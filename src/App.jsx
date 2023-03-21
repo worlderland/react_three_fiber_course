@@ -3,8 +3,10 @@ import { Canvas, useLoader } from '@react-three/fiber'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 export default function App() {
-  const gltf = useLoader(GLTFLoader, './models/monkey.glb')
-  console.log(gltf)
+  const monkey = useLoader(GLTFLoader, './models/monkey.glb')
+  const pipe = useLoader(GLTFLoader, './models/pipe/modular_industrial_pipes_01_1k.gltf')
+  console.log(monkey)
+  console.log(pipe)
 
   return (
     <Canvas camera={{ position: [-0.5, 1, 2] }} shadows>
@@ -12,8 +14,13 @@ export default function App() {
       <Environment files='./images/rustig_koppie_puresky_1k.hdr' background />
       {/* <Environment files='./images/syferfontein_1d_clear_puresky_1k.hdr' background /> */}
       <primitive
-        object={gltf.scene}
+        object={monkey.scene}
         position={[0, 1, 0]}
+        children-0-castShadow
+      />
+      <primitive
+        object={pipe.scene}
+        position={[0, 3, 0]}
         children-0-castShadow
       />
       {/* <Circle args={[10]} rotation-x={-Math.PI / 2} receiveShadow>
