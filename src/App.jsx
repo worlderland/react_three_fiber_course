@@ -1,105 +1,66 @@
 import Polyhedron from './Polyhedron'
 import * as THREE from 'three'
-import { Canvas } from '@react-three/fiber'
 import { Stats, OrbitControls } from '@react-three/drei'
+import { Canvas, useLoader } from '@react-three/fiber'
 import { useControls } from 'leva'
+import { useRef } from 'react'
 import Floor from './Floor'
 
 function Lights() {
-  const ambientCtl = useControls('Ambient Light', {
-    visible: false,
-    intensity: {
-      value: 1.0,
-      min: 0,
-      max: 1.0,
-      step: 0.1
-    }
-  })
+  const directionalRef = useRef()
 
-  const directionalCtl = useControls('Directional Light', {
-    visible: true,
+  useControls('Directional Light', {
+    intensity: {
+      value: 1,
+      min: 0,
+      max: 5,
+      step: 0.1,
+      onChange: (v) => {
+        directionalRef.current.intensity = v
+      },
+    },
+
     position: {
       x: 3.3,
       y: 1.0,
-      z: 4.4
+      z: 4.4,
+      onChange: (v) => {
+        directionalRef.current.position.copy(v)
+      },
     },
-    castShadow: true
   })
 
-  const pointCtl = useControls('Point Light', {
-    visible: false,
-    position: {
-      x: 2,
-      y: 0,
-      z: 0
-    },
-    castShadow: true
-  })
-
-  const spotCtl = useControls('Spot Light', {
-    visible: false,
-    position: {
-      x: 3,
-      y: 2.5,
-      z: 1
-    },
-    castShadow: true
-  })
-
-  return (
-    <>
-      <ambientLight
-        visible={ambientCtl.visible}
-        intensity={ambientCtl.intensity}
-      />
-      <directionalLight
-        visible={directionalCtl.visible}
-        position={[
-          directionalCtl.position.x,
-          directionalCtl.position.y,
-          directionalCtl.position.z
-        ]}
-        castShadow={directionalCtl.castShadow}
-      />
-      <pointLight
-        visible={pointCtl.visible}
-        position={[
-          pointCtl.position.x,
-          pointCtl.position.y,
-          pointCtl.position.z
-        ]}
-        castShadow={pointCtl.castShadow}>
-        <mesh>
-          <sphereGeometry args={[0.1]} />
-        </mesh>
-      </pointLight>
-      <spotLight
-        visible={spotCtl.visible}
-        position={[spotCtl.position.x, spotCtl.position.y, spotCtl.position.z]}
-        castShadow={spotCtl.castShadow}
-      />
-    </>
-  )
+  return <directionalLight ref={directionalRef} castShadow />
 }
+
 export default function App() {
+  const texture = useLoader(THREE.TextureLoader, './images/grid.png')
+
   return (
     <Canvas camera={{ position: [4, 4, 1.5] }} shadows>
       <Lights />
       <Polyhedron
         name="meshBasicMaterial"
         position={[-3, 1, 0]}
-        material={new THREE.MeshBasicMaterial({ color: 'yellow' })}
+        material={new THREE.MeshBasicMaterial({ map: texture })}
       />
       <Polyhedron
         name="meshNormalMaterial"
         position={[-1, 1, 0]}
-        material={new THREE.MeshNormalMaterial({ flatShading: true })}
+        material={
+          new THREE.MeshNormalMaterial({
+            flatShading: true,
+          })
+        }
       />
       <Polyhedron
         name="meshPhongMaterial"
         position={[1, 1, 0]}
         material={
-          new THREE.MeshPhongMaterial({ color: 'lime', flatShading: true })
+          new THREE.MeshPhongMaterial({
+            flatShading: true,
+            map: texture,
+          })
         }
       />
       <Polyhedron
@@ -107,13 +68,13 @@ export default function App() {
         position={[3, 1, 0]}
         material={
           new THREE.MeshStandardMaterial({
-            color: 0xff0033,
-            flatShading: true
+            flatShading: true,
+            map: texture,
           })
         }
       />
       <Floor />
-      <OrbitControls target={[2, 2, 0]} />
+      <OrbitControls target={[0, 1, 0]} />
       <axesHelper args={[5]} />
       <Stats />
     </Canvas>
