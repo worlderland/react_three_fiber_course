@@ -1,7 +1,60 @@
-import { Stats, OrbitControls, Environment } from '@react-three/drei'
+import {
+  Stats,
+  OrbitControls,
+  Environment,
+  ContactShadows
+} from '@react-three/drei'
 import { Canvas, useLoader } from '@react-three/fiber'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
-import { useControls } from 'leva'
+import { Leva, useControls } from 'leva'
+
+function Model() {
+  const { scene } = useLoader(GLTFLoader, './models/scene.glb')
+
+  const {
+    x,
+    y,
+    z,
+    visible,
+    color,
+    metalness,
+    roughness,
+    clearcoat,
+    clearcoatRoughness,
+    transmission,
+    ior,
+    thickness
+  } = useControls('Suzanne', {
+    x: { value: 0, min: 0, max: Math.PI * 2, step: 0.01 },
+    y: { value: 0, min: 0, max: Math.PI * 2, step: 0.01 },
+    z: { value: 0, min: 0, max: Math.PI * 2, step: 0.01 },
+    visible: true,
+    color: { value: '#ffbc85' },
+    metalness: { value: 0, min: 0, max: 1.0, step: 0.01 },
+    roughness: { value: 0, min: 0, max: 1.0, step: 0.01 },
+    clearcoat: { value: 1, min: 0, max: 1.0, step: 0.01 },
+    clearcoatRoughness: { value: 0, min: 0, max: 1.0, step: 0.01 },
+    transmission: { value: 1.0, min: 0, max: 1.0, step: 0.01 },
+    ior: { value: 1.74, min: 1, max: 5, step: 0.01 },
+    thickness: { value: 3.12, min: 0, max: 5, step: 0.01 }
+  })
+
+  return (
+    <primitive
+      object={scene}
+      children-0-rotation={[x, y, z]}
+      children-0-visible={visible}
+      children-0-material-color={color}
+      children-0-material-metalness={metalness}
+      children-0-material-roughness={roughness}
+      children-0-material-clearcoat={clearcoat}
+      children-0-material-clearcoatRoughness={clearcoatRoughness}
+      children-0-material-transmission={transmission}
+      children-0-material-ior={ior}
+      children-0-material-thickness={thickness}
+    />
+  )
+}
 
 function Env() {
   const { height, radius, scale } = useControls('Ground', {
@@ -11,7 +64,7 @@ function Env() {
   })
   return (
     <Environment
-      files="./images/rustig_koppie_puresky_1k.hdr"
+      preset="sunset"
       background
       ground={{
         height: height,
@@ -23,27 +76,20 @@ function Env() {
 }
 
 export default function App() {
-  const model = useLoader(GLTFLoader, './models/scene.glb')
-  //   const pipe = useLoader(GLTFLoader, './models/pipe/modular_industrial_pipes_01_1k.gltf')
-  console.log(model)
-  //   console.log(pipe)
-
   return (
-    <Canvas camera={{ position: [-0.5, 1, 2] }} shadows>
+    <>
+      <Canvas camera={{ position: [-8, 5, 8] }}>
         <Env />
-      {/* <Environment files='./images/syferfontein_1d_clear_puresky_1k.hdr' background /> */}
-      <primitive object={model.scene} children-0-castShadow />
-      {/* <primitive
-        object={pipe.scene}
-        position={[0, 3, 0]}
-        children-0-castShadow
-      /> */}
-      {/* <Circle args={[10]} rotation-x={-Math.PI / 2} receiveShadow>
-        <meshStandardMaterial />
-      </Circle> */}
-      <OrbitControls target={[0, 1, 0]} />
-      <axesHelper args={[5]} />
-      <Stats />
-    </Canvas>
+        <Model />
+        <ContactShadows
+          scale={150}
+          position={[0.33, -0.33, 0.33]}
+          opacity={1.5}
+        />
+        <OrbitControls target={[0, 1, 0]} maxPolarAngle={Math.PI / 2} />
+        <Stats />
+      </Canvas>
+      <Leva collapsed />
+    </>
   )
 }
